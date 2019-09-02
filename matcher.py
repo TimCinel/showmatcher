@@ -25,7 +25,6 @@ parser.add_argument('--naming-pattern', dest='naming_pattern', action='store')
 args = parser.parse_args()
 
 tvdb = None
-show = None
 
 file_list = glob.glob("{}/*.mp4".format(args.directory))
 
@@ -82,7 +81,8 @@ for show_file in file_list:
 
         if tvdb is None:
             tvdb = tvdb_api.Tvdb()
-            show = tvdb[args.series]
+
+        show = tvdb[args.series]
 
         episode_name = re.compile(args.ignore).sub("", os.path.basename(file_noext)).strip()
         print "Looking up {} episode \"{}\"".format(args.series, episode_name)
