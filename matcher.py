@@ -103,19 +103,23 @@ for show_file in file_list:
     def episode_known_pattern():
         episode_details = re.compile(args.naming_pattern).search(file_noext)
 
-        season = int(episode_details.group('season'))
-        episode = int(episode_details.group('episode'))
-        name = episode_details.group('name')
+        try:
+            season = int(episode_details.group('season'))
+            episode = int(episode_details.group('episode'))
+            name = episode_details.group('name')
 
-        if season == '' or episode is '':
-            print u"WARNING: No adequate pattern match found for {}.".format(file_noext)
+            if season == '' or episode == '':
+                print u"WARNING: Empty season ({}) or episode ({}) for {}".format(season, episode, file_noext)
+            else:
+                matching_episode({
+                    'episodeName': name,
+                    'seriesName': args.series,
+                    'airedSeason': season,
+                    'airedEpisodeNumber': episode,
+                })
 
-        matching_episode({
-            'episodeName': name,
-            'seriesName': args.series,
-            'airedSeason': season,
-            'airedEpisodeNumber': episode,
-        })
+        except:
+            print u"WARNING: No pattern match for {}.".format(file_noext)
 
     if args.ignore:
         episode_find_by_name()
