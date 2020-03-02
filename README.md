@@ -75,6 +75,15 @@ To do that, we could run showmatcher for each show:
     Series Shaun Micallef's Mad as Hell has episodes
     Renaming to Season 10/Shaun Micallef's Mad as Hell S10E10
 
+    $ python matcher.py \
+        --directory "/home/me/iview-downloads/media watch"
+        --destination "/home/me/tv/media watch" \
+        --series-name  "Media Watch" \
+        --naming-patttern "Media Watch (?P<day>[0-9]+)-(?P<month>[0-9]+)-(?P<year>[0-9]+)"
+
+    Series Media Watch has episodes
+    Renaming to Season 2020/Media Watch - 2020-02-17
+
 
 Alternatively, we could create showmatcher config files:
 
@@ -96,6 +105,12 @@ Alternatively, we could create showmatcher config files:
     series-name  = Shaun Micallefs MAD AS HELL 
     naming-pattern = Shaun Micallefs MAD AS HELL Series (?P<season>[0-9]+) Ep (?P<episode>[0-9]+) ?(?P<name>.*)
 
+    $ cat "/home/me/iview-downloads/media watch/.matcherrc"
+    directory = /home/me/iview-downloads/media watch
+    destination = /home/me/tv/media watch
+    series-name  = Media Watch
+    naming-pattern = Media Watch (?P<day>[0-9]+)-(?P<month>[0-9]+)-(?P<year>[0-9]+)
+
 This way we don't have to remember the commands and can batch run
 across multiple shows at once:
 
@@ -109,3 +124,5 @@ across multiple shows at once:
     Renaming to Season 2018/Four Corners S2018E21 Outbreak
     Series Shaun Micallef's Mad as Hell has episodes
     Renaming to Season 10/Shaun Micallef's Mad as Hell S10E10
+    Series Media Watch has episodes
+    Renaming to Season 2020/Media Watch - 2020-02-17
