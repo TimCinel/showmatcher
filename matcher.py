@@ -14,7 +14,10 @@ parser = configargparse.ArgParser(description='Match some shows', default_config
 
 parser.add('-c', '--config', required=False, is_config_file=True)
 parser.add_argument('--destination', dest='destination', action='store', required=True)
+
 parser.add_argument('--series-name', dest='series', action='store', required=True)
+parser.add_argument('--series-id', dest='series_id', action='store', type=int)
+
 parser.add_argument('--directory', dest='directory', action='store', required=True)
 parser.add_argument('--dry-run', dest='dry_run', default=False, action='store_true')
 
@@ -90,7 +93,7 @@ for show_file in file_list:
         if tvdb is None:
             tvdb = tvdb_api.Tvdb()
 
-        show = tvdb[args.series]
+        show = tvdb[args.series if args.series_id is None else args.series_id]
 
         episode_name = re.compile(args.ignore).sub("", basename_noext).strip()
         print "Looking up {} episode \"{}\"".format(args.series, episode_name)
