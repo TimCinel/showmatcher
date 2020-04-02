@@ -21,9 +21,9 @@ parser.add_argument('--series-id', dest='series_id', action='store', type=int)
 parser.add_argument('--directory', dest='directory', action='store', required=True)
 parser.add_argument('--dry-run', dest='dry_run', default=False, action='store_true')
 
-ignore_or_series = parser.add_mutually_exclusive_group()
-parser.add_argument('--ignore-substring', dest='ignore', action='store')
-parser.add_argument('--naming-pattern', dest='naming_pattern', action='store')
+ignore_or_series = parser.add_mutually_exclusive_group(required=True)
+ignore_or_series.add_argument('--ignore-substring', dest='ignore', action='store')
+ignore_or_series.add_argument('--naming-pattern', dest='naming_pattern', action='store')
 
 args = parser.parse_args()
 
