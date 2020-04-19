@@ -52,7 +52,7 @@ for show_file in file_list:
         episode_name = episode['episodeName']
 
         if episode_name != '':
-            episode_name = ' {}'.format(episode_name)
+            episode_name = u' {}'.format(episode_name)
 
         if 'airedEpisodeNumber' in episode:
             full_name = u"%s S%02dE%02d %s" % (
