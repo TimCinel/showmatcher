@@ -41,9 +41,9 @@ for show_file in file_list:
     file_noext, ext = os.path.splitext(show_file)
     basename_noext = os.path.basename(file_noext)
 
-    companions = []
-    for companion_type in ['srt']:
-        companions += glob.glob("{}*.{}".format(file_noext, companion_type))
+    sidcars = []
+    for sidecar_type in ['srt','jpg']:
+        sidcars += glob.glob("{}*.{}".format(file_noext, sidecar_type))
 
     def filename_filter(filename):
         return filename.replace("/", "-")
@@ -80,9 +80,9 @@ for show_file in file_list:
         else:
             shutil.move(os.path.join(args.directory, show_file), new_file)
 
-            for companion in companions:
-                new_companion = os.path.join(args.destination, u"{}{}".format(nice_path, os.path.splitext(companion)[1]))
-                shutil.move(companion, new_companion)
+            for sidecar in sidcars:
+                new_companion = os.path.join(args.destination, u"{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
+                shutil.move(sidecar, new_companion)
 
     def normalise(tvdb_episode_name):
         return re.sub(r"[^0-9a-z ]", '', tvdb_episode_name.lower())
