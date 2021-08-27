@@ -55,7 +55,7 @@ for show_file in file_list:
             episode_name = u' {}'.format(episode_name)
 
         if 'airedEpisodeNumber' in episode:
-            full_name = u"%s S%02dE%02d %s" % (
+            full_name = u"%s S%02dE%02d%s" % (
                 episode['seriesName'],
                 episode['airedSeason'],
                 episode['airedEpisodeNumber'],
