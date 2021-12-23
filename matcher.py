@@ -43,7 +43,7 @@ for show_file in file_list:
 
     sidcars = []
     for sidecar_type in ['srt','jpg']:
-        sidcars += glob.glob("{}*.{}".format(file_noext, sidecar_type))
+        sidcars += glob.glob("{}.{}".format(file_noext, sidecar_type))
 
     def filename_filter(filename):
         return filename.replace("/", "-")
@@ -73,6 +73,7 @@ for show_file in file_list:
         new_file = os.path.join(args.destination, u"{}{}".format(nice_path, ext))
         if args.dry_run:
             print u"Dry run!"
+            return
         elif os.path.exists(new_file):
             print u"WARNING: Couldn't move {}, destination file already exists.".format(show_file)
         elif not os.path.exists(os.path.dirname(new_file)):
@@ -81,8 +82,8 @@ for show_file in file_list:
             shutil.move(os.path.join(args.directory, show_file), new_file)
 
             for sidecar in sidcars:
-                new_companion = os.path.join(args.destination, u"{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
-                shutil.move(sidecar, new_companion)
+                new_sidecar = os.path.join(args.destination, u"{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
+                shutil.move(sidecar, new_sidecar)
 
     def normalise(tvdb_episode_name):
         return re.sub(r"[^0-9a-z ]", '', tvdb_episode_name.lower())
