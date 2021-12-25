@@ -55,19 +55,19 @@ for show_file in file_list:
             episode_name = u' {}'.format(episode_name)
 
         if 'airedEpisodeNumber' in episode:
-            full_name = u"%s S%02dE%02d%s" % (
+            full_name = u"{} S{:0>2d}E{:0>2d}{}".format(
                 episode['seriesName'],
                 episode['airedSeason'],
                 episode['airedEpisodeNumber'],
                 filename_filter(episode_name),
                 )
-            nice_path = os.path.join(u"Season %02d" % episode['airedSeason'], full_name)
+            nice_path = os.path.join(u"Season {:0>2d} {}".format(episode['airedSeason'], full_name))
         else:
-            full_name = u"%s -%s" % (
+            full_name = u"{} -{}".format(
                 episode['seriesName'],
                 filename_filter(episode_name),
                 )
-            nice_path = os.path.join(u"Season %d" % episode['airedSeason'], full_name)
+            nice_path = os.path.join(u"Season {:d}".format(episode['airedSeason']), full_name)
 
         print u"Renaming to {}".format(nice_path)
         new_file = os.path.join(args.destination, u"{}{}".format(nice_path, ext))
@@ -121,7 +121,7 @@ for show_file in file_list:
                 month = int(episode_details.group('month'))
                 day = int(episode_details.group('day'))
 
-                label = u"%d-%02d-%02d" % (year, month, day)
+                label = u"{:d}-{:0>2d}-{:0>2d}".format(year, month, day)
 
                 matching_episode({
                     'episodeName': label,
