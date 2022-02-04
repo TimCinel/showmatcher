@@ -61,7 +61,7 @@ for show_file in file_list:
                 episode['airedEpisodeNumber'],
                 filename_filter(episode_name),
                 )
-            nice_path = os.path.join(u"Season {:0>2d} {}".format(episode['airedSeason'], full_name))
+            nice_path = os.path.join(u"Season {:0>2d}".format(episode['airedSeason']), full_name)
         else:
             full_name = u"{} -{}".format(
                 episode['seriesName'],
