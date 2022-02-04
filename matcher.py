@@ -46,7 +46,7 @@ for show_file in file_list:
         sidcars += glob.glob("{}.{}".format(file_noext, sidecar_type))
 
     def filename_filter(filename):
-        return filename.replace("/", "-")
+        return re.sub('[:<>/|?*\\\\]', '-', filename)
 
     def matching_episode(episode):
         episode_name = episode['episodeName']
@@ -56,7 +56,7 @@ for show_file in file_list:
 
         if 'airedEpisodeNumber' in episode:
             full_name = u"{} S{:0>2d}E{:0>2d}{}".format(
-                episode['seriesName'],
+                filename_filter(episode['seriesName']),
                 episode['airedSeason'],
                 episode['airedEpisodeNumber'],
                 filename_filter(episode_name),
@@ -106,7 +106,7 @@ for show_file in file_list:
         )
         if (fuzzyMatch):
             episode = show.search(fuzzyMatch[2], 'id')[0]
-            episode['seriesName'] = episode.season.show['seriesName']
+            episode['seriesName'] = args.series
 
             matching_episode(episode)
         else:
