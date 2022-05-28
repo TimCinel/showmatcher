@@ -29,13 +29,13 @@ args = parser.parse_args()
 
 tvdb = None
 
-file_list = glob.glob("{}/*.mp4".format(args.directory))
+file_list = glob.glob(u"{}/*.mp4".format(args.directory))
 
 if not file_list:
     # print "No episodes for {}".format(args.series)
     sys.exit(0)
 else:
-    print "Series {} has episodes".format(args.series)
+    print u"Series {} has episodes".format(args.series)
 
 for show_file in file_list:
     file_noext, ext = os.path.splitext(show_file)
@@ -43,7 +43,7 @@ for show_file in file_list:
 
     sidcars = []
     for sidecar_type in ['srt','jpg']:
-        sidcars += glob.glob("{}.{}".format(file_noext, sidecar_type))
+        sidcars += glob.glob(u"{}.{}".format(file_noext, sidecar_type))
 
     def filename_filter(filename):
         return re.sub('[:<>/|?*\\\\]', '-', filename)
@@ -97,7 +97,7 @@ for show_file in file_list:
         show = tvdb[args.series if args.series_id is None else args.series_id]
 
         episode_name = re.compile(args.ignore).sub("", basename_noext).strip()
-        print "Looking up {} episode \"{}\"".format(args.series, episode_name)
+        print u"Looking up {} episode \"{}\"".format(args.series, episode_name)
 
         fuzzyMatch = process.extractOne(
             query=episode_name,
