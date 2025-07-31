@@ -1,4 +1,0 @@
-destination = /data/destination/Peter Rabbit (2013)
-series-name  = Peter Rabbit (2013)
-naming-pattern = Peter Rabbit (Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)
-directory = /data/source/Peter Rabbit

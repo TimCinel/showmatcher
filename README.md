@@ -15,6 +15,22 @@ Features:
 * Will rename any associated files (subtitles, for example) accordingly
 * Supports "dry run" mode
 * Supports CLI arguments being passed in a file
+* Environment variable support for API keys
+
+## Setup
+
+For episode name matching (TVDB lookup), you'll need a TVDB API key:
+
+1. Get your API key from: https://thetvdb.com/api-information
+2. Set the environment variable:
+   ```bash
+   export TVDB_API_KEY=your-api-key-here
+   ```
+   
+   Or use the command line option:
+   ```bash
+   python matcher.py --tvdb-api-key your-api-key-here ...
+   ```
 
 Episode name matching mode:
 

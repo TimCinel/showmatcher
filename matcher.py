@@ -17,6 +17,9 @@ parser.add_argument('--destination', dest='destination', action='store', require
 
 parser.add_argument('--series-name', dest='series', action='store', required=True)
 parser.add_argument('--series-id', dest='series_id', action='store', type=int)
+parser.add_argument('--tvdb-api-key', dest='tvdb_api_key', action='store', 
+                    default=os.environ.get('TVDB_API_KEY'),
+                    help='TVDB API key (default: from TVDB_API_KEY environment variable)')
 
 parser.add_argument('--directory', dest='directory', action='store', required=True)
 parser.add_argument('--dry-run', dest='dry_run', default=False, action='store_true')
@@ -92,7 +95,13 @@ for show_file in file_list:
         global tvdb
 
         if tvdb is None:
-            tvdb = tvdb_api.Tvdb()
+            if not args.tvdb_api_key:
+                print("ERROR: TVDB API key is required for episode name matching.")
+                print("Set the TVDB_API_KEY environment variable or use --tvdb-api-key")
+                print("Get your API key from: https://thetvdb.com/api-information")
+                sys.exit(1)
+            
+            tvdb = tvdb_api.Tvdb(apikey=args.tvdb_api_key)
 
         show = tvdb[args.series if args.series_id is None else args.series_id]
 
