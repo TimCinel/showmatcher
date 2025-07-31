@@ -29,13 +29,13 @@ args = parser.parse_args()
 
 tvdb = None
 
-file_list = glob.glob(u"{}/*.mp4".format(args.directory))
+file_list = glob.glob("{}/*.mp4".format(args.directory))
 
 if not file_list:
     # print "No episodes for {}".format(args.series)
     sys.exit(0)
 else:
-    print u"Series {} has episodes".format(args.series)
+    print("Series {} has episodes".format(args.series))
 
 for show_file in file_list:
     file_noext, ext = os.path.splitext(show_file)
@@ -43,7 +43,7 @@ for show_file in file_list:
 
     sidcars = []
     for sidecar_type in ['srt','jpg']:
-        sidcars += glob.glob(u"{}.{}".format(file_noext, sidecar_type))
+        sidcars += glob.glob("{}.{}".format(file_noext, sidecar_type))
 
     def filename_filter(filename):
         return re.sub('[:<>/|?*\\\\]', '-', filename)
@@ -52,37 +52,37 @@ for show_file in file_list:
         episode_name = episode['episodeName']
 
         if episode_name != '':
-            episode_name = u' {}'.format(episode_name)
+            episode_name = ' {}'.format(episode_name)
 
         if 'airedEpisodeNumber' in episode:
-            full_name = u"{} S{:0>2d}E{:0>2d}{}".format(
+            full_name = "{} S{:0>2d}E{:0>2d}{}".format(
                 filename_filter(episode['seriesName']),
                 episode['airedSeason'],
                 episode['airedEpisodeNumber'],
                 filename_filter(episode_name),
                 )
-            nice_path = os.path.join(u"Season {:0>2d}".format(episode['airedSeason']), full_name)
+            nice_path = os.path.join("Season {:0>2d}".format(episode['airedSeason']), full_name)
         else:
-            full_name = u"{} -{}".format(
+            full_name = "{} -{}".format(
                 episode['seriesName'],
                 filename_filter(episode_name),
                 )
-            nice_path = os.path.join(u"Season {:d}".format(episode['airedSeason']), full_name)
+            nice_path = os.path.join("Season {:d}".format(episode['airedSeason']), full_name)
 
-        print u"Renaming to {}".format(nice_path)
-        new_file = os.path.join(args.destination, u"{}{}".format(nice_path, ext))
+        print("Renaming to {}".format(nice_path))
+        new_file = os.path.join(args.destination, "{}{}".format(nice_path, ext))
         if args.dry_run:
-            print u"Dry run!"
+            print("Dry run!")
             return
         elif os.path.exists(new_file):
-            print u"WARNING: Couldn't move {}, destination file already exists.".format(show_file)
+            print("WARNING: Couldn't move {}, destination file already exists.".format(show_file))
         elif not os.path.exists(os.path.dirname(new_file)):
-            print u"WARNING: Couldn't move {}, destination directory does not exist.".format(show_file)
+            print("WARNING: Couldn't move {}, destination directory does not exist.".format(show_file))
         else:
             shutil.move(os.path.join(args.directory, show_file), new_file)
 
             for sidecar in sidcars:
-                new_sidecar = os.path.join(args.destination, u"{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
+                new_sidecar = os.path.join(args.destination, "{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
                 shutil.move(sidecar, new_sidecar)
 
     def normalise(tvdb_episode_name):
@@ -97,7 +97,7 @@ for show_file in file_list:
         show = tvdb[args.series if args.series_id is None else args.series_id]
 
         episode_name = re.compile(args.ignore).sub("", basename_noext).strip()
-        print u"Looking up {} episode \"{}\"".format(args.series, episode_name)
+        print("Looking up {} episode \"{}\"".format(args.series, episode_name))
 
         fuzzyMatch = process.extractOne(
             query=episode_name,
@@ -110,7 +110,7 @@ for show_file in file_list:
 
             matching_episode(episode)
         else:
-            print u"WARNING: No adequate TVDB match found for {}.".format(episode_name)
+            print("WARNING: No adequate TVDB match found for {}.".format(episode_name))
 
     def episode_known_pattern():
         episode_details = re.compile(args.naming_pattern).search(basename_noext)
@@ -121,7 +121,7 @@ for show_file in file_list:
                 month = int(episode_details.group('month'))
                 day = int(episode_details.group('day'))
 
-                label = u"{:d}-{:0>2d}-{:0>2d}".format(year, month, day)
+                label = "{:d}-{:0>2d}-{:0>2d}".format(year, month, day)
 
                 matching_episode({
                     'episodeName': label,
@@ -139,8 +139,8 @@ for show_file in file_list:
                     'airedSeason': season,
                     'airedEpisodeNumber': episode,
                 })
-        except:
-            print u"WARNING: No pattern match for {}.".format(basename_noext)
+        except Exception as e:
+            print("WARNING: No pattern match for {}.".format(basename_noext))
 
     if args.ignore:
         episode_find_by_name()

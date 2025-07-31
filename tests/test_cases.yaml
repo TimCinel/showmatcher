@@ -1,0 +1,211 @@
+# Test cases for showmatcher
+# Each test suite contains configuration, optional TVDB mock data, and expected input/output pairs
+
+test_suites:
+  - name: "Peter Rabbit Pattern Matching"
+    config:
+      destination: "/data/destination/Peter Rabbit (2013)"
+      series-name: "Peter Rabbit (2013)"
+      naming-pattern: "Peter Rabbit (Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+      directory: "/data/source/Peter Rabbit"
+      dry-run: true
+    tvdb_mock_data:
+      episodes:
+        - id: 1
+          episodeName: "The Tale Of Benjamin-s New Map"
+          airedSeason: 1
+          airedEpisodeNumber: 1
+          seriesName: "Peter Rabbit (2013)"
+        - id: 2
+          episodeName: "The Tale Of The Lost Ladybird"
+          airedSeason: 1
+          airedEpisodeNumber: 2
+          seriesName: "Peter Rabbit (2013)"
+        - id: 3
+          episodeName: "The Tail Of Cotton-Tails Tooth"
+          airedSeason: 2
+          airedEpisodeNumber: 1
+          seriesName: "Peter Rabbit (2013)"
+        - id: 4
+          episodeName: "The Tale Of Cotton-Tails Party"
+          airedSeason: 2
+          airedEpisodeNumber: 2
+          seriesName: "Peter Rabbit (2013)"
+    tests:
+      # Single file tests
+      - in: "Peter Rabbit Series 1 The Tale Of Benjamin-s New Map.mp4"
+        out: "Season 01/Peter Rabbit (2013) S01E01 The Tale Of Benjamin-s New Map.mp4"
+      - in: "Peter Rabbit Series 1 The Tale Of The Lost Ladybird.mp4"
+        out: "Season 01/Peter Rabbit (2013) S01E01 The Tale Of The Lost Ladybird.mp4"
+      - in: "Peter Rabbit Series 2 The Tail Of Cotton-Tails Tooth.mp4"
+        out: "Season 02/Peter Rabbit (2013) S02E01 The Tail Of Cotton-Tails Tooth.mp4"
+      - in: "Peter Rabbit Series 2 The Tale Of Cotton-Tails Party.mp4"
+        out: "Season 02/Peter Rabbit (2013) S02E01 The Tale Of Cotton-Tails Party.mp4"
+      
+      # Multi-file test (video + sidecar)
+      - in:
+          - "Peter Rabbit Series 2 The Tale of Cottontail-s Treetop Tumble.mp4"
+          - "Peter Rabbit Series 2 The Tale of Cottontail-s Treetop Tumble.srt"
+        out:
+          - "Season 02/Peter Rabbit (2013) S02E01 The Tale of Cottontail-s Treetop Tumble.mp4"
+          - "Season 02/Peter Rabbit (2013) S02E01 The Tale of Cottontail-s Treetop Tumble.srt"
+      
+      # Another multi-file test
+      - in:
+          - "Peter Rabbit Series 2 The Tale Of The Go Kart Get Away.mp4"
+          - "Peter Rabbit Series 2 The Tale Of The Go Kart Get Away.srt"
+          - "Peter Rabbit Series 2 The Tale Of The Go Kart Get Away.jpg"
+        out:
+          - "Season 02/Peter Rabbit (2013) S02E01 The Tale Of The Go Kart Get Away.mp4"
+          - "Season 02/Peter Rabbit (2013) S02E01 The Tale Of The Go Kart Get Away.srt"
+          - "Season 02/Peter Rabbit (2013) S02E01 The Tale Of The Go Kart Get Away.jpg"
+      
+      # Single sidecar file test
+      - in: "Peter Rabbit Series 1 The Tale Of Benjamin-s New Map.srt"
+        out: "Season 01/Peter Rabbit (2013) S01E01 The Tale Of Benjamin-s New Map.srt"
+
+  - name: "Shaun The Sheep Pattern Matching"
+    config:
+      destination: "/data/destination/Shaun The Sheep"
+      series-name: "Shaun The Sheep"
+      naming-pattern: "Shaun The Sheep( Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+      directory: "/data/source/Shaun The Sheep"
+      dry-run: true
+    tvdb_mock_data:
+      episodes:
+        - id: 1
+          episodeName: "Bake It Easy"
+          airedSeason: 7
+          airedEpisodeNumber: 1
+          seriesName: "Shaun The Sheep"
+        - id: 2
+          episodeName: "Shelf Life"
+          airedSeason: 7
+          airedEpisodeNumber: 2
+          seriesName: "Shaun The Sheep"
+        - id: 3
+          episodeName: "Take Away"
+          airedSeason: 1
+          airedEpisodeNumber: 5
+          seriesName: "Shaun The Sheep"
+        - id: 4
+          episodeName: "Happy Birthday Timmy"
+          airedSeason: 4
+          airedEpisodeNumber: 1
+          seriesName: "Shaun The Sheep"
+    tests:
+      # Files with episode numbers only
+      - in: "Shaun The Sheep Episode 1 Bake It Easy.mp4"
+        out: "Season 01/Shaun The Sheep S01E01 Bake It Easy.mp4"
+      - in: "Shaun The Sheep Episode 2 Shelf Life.mp4"
+        out: "Season 01/Shaun The Sheep S01E02 Shelf Life.mp4"
+      - in: "Shaun The Sheep Episode 10 Ruffing It.mp4"
+        out: "Season 01/Shaun The Sheep S01E10 Ruffing It.mp4"
+      
+      # Files with series numbers only
+      - in: "Shaun The Sheep Series 1 Take Away.mp4"
+        out: "Season 01/Shaun The Sheep S01E01 Take Away.mp4"
+      - in: "Shaun The Sheep Series 1 Washday.mp4"
+        out: "Season 01/Shaun The Sheep S01E01 Washday.mp4"
+      - in: "Shaun The Sheep Series 6 Go Blitzer Go!.mp4"
+        out: "Season 06/Shaun The Sheep S06E01 Go Blitzer Go!.mp4"
+      - in: "Shaun The Sheep Series 6 Space Blitzer.mp4"
+        out: "Season 06/Shaun The Sheep S06E01 Space Blitzer.mp4"
+      
+      # Files with series 7
+      - in: "Shaun The Sheep Series 7 Bake It Easy.mp4"
+        out: "Season 07/Shaun The Sheep S07E01 Bake It Easy.mp4"
+      - in: "Shaun The Sheep Series 7 Shelf Life.mp4"
+        out: "Season 07/Shaun The Sheep S07E01 Shelf Life.mp4"
+      
+      # Files with series 2
+      - in: "Shaun The Sheep Series 2 Supersize Timmy.mp4"
+        out: "Season 02/Shaun The Sheep S02E01 Supersize Timmy.mp4"
+      - in: "Shaun The Sheep Series 2 Party Animal.mp4"
+        out: "Season 02/Shaun The Sheep S02E01 Party Animal.mp4"
+      
+      # Files with series 4
+      - in: "Shaun The Sheep Series 4 Cones.mp4"
+        out: "Season 04/Shaun The Sheep S04E01 Cones.mp4"
+      
+      # Multi-file test with sidecar
+      - in:
+          - "Shaun The Sheep Series 4 Happy Birthday Timmy.mp4"
+          - "Shaun The Sheep Series 4 Happy Birthday Timmy.srt"
+        out:
+          - "Season 04/Shaun The Sheep S04E01 Happy Birthday Timmy.mp4"
+          - "Season 04/Shaun The Sheep S04E01 Happy Birthday Timmy.srt"
+
+  - name: "Filename Character Filtering"
+    config:
+      destination: "/data/destination/Test Show"
+      series-name: "Test Show"
+      naming-pattern: "Test Show Series (?P<season>[0-9]+) Episode (?P<episode>[0-9]+) (?P<name>.*)"
+      directory: "/data/source/Test Show"
+      dry-run: true
+    tests:
+      - in: "/Test Show/Test Show Series 1 Episode 1 with: colon.mp4"
+        out: "Season 01/Test Show S01E01 with- colon.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with<bracket.mp4"
+        out: "Season 01/Test Show S01E01 with-bracket.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with-slash.mp4"
+        out: "Season 01/Test Show S01E01 with-slash.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with|pipe.mp4"
+        out: "Season 01/Test Show S01E01 with-pipe.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with?question.mp4"
+        out: "Season 01/Test Show S01E01 with-question.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with*asterisk.mp4"
+        out: "Season 01/Test Show S01E01 with-asterisk.mp4"
+      - in: "/Test Show/Test Show Series 1 Episode 1 with\\backslash.mp4"
+        out: "Season 01/Test Show S01E01 with-backslash.mp4"
+
+  - name: "Pattern Edge Cases"
+    config:
+      destination: "/data/destination/Edge Case Show"
+      series-name: "Edge Case Show"
+      naming-pattern: "Edge Case Show( Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+      directory: "/data/source/Edge Case Show"
+      dry-run: true
+    tests:
+      # Pattern with missing optional groups
+      - in: "/Edge Case Show/Edge Case Show Just Episode Name.mp4"
+        out: "Season 01/Edge Case Show S01E01 Just Episode Name.mp4"
+      # Pattern with only season
+      - in: "/Edge Case Show/Edge Case Show Series 5 Episode Name Only.mp4"
+        out: "Season 05/Edge Case Show S05E01 Episode Name Only.mp4"
+      # Pattern with season and episode
+      - in: "/Edge Case Show/Edge Case Show Series 3 Episode 7 Full Pattern.mp4"
+        out: "Season 03/Edge Case Show S03E07 Full Pattern.mp4"
+
+# Test configuration for character filtering validation
+character_filter_tests:
+  - input: "Name with: colon"
+    expected: "Name with- colon"
+  - input: "Name with<bracket"
+    expected: "Name with-bracket"  
+  - input: "Name with/slash"
+    expected: "Name with-slash"
+  - input: "Name with|pipe"
+    expected: "Name with-pipe"
+  - input: "Name with?question"
+    expected: "Name with-question"
+  - input: "Name with*asterisk"
+    expected: "Name with-asterisk"
+  - input: "Name with\\backslash"
+    expected: "Name with-backslash"
+
+# Pattern validation tests
+pattern_validation_tests:
+  - description: "Pattern that doesn't match"
+    input: "Completely Different Format"
+    pattern: "Expected Pattern (?P<season>[0-9]+)"
+    series: "Test Series"
+    should_match: false
+  - description: "Pattern with missing optional groups"
+    input: "Shaun The Sheep Just Episode Name"
+    pattern: "Shaun The Sheep( Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+    series: "Shaun The Sheep"
+    should_match: true
+    expected_season: 1
+    expected_episode: 1
+    expected_name: "Just Episode Name"

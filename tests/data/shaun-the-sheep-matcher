@@ -1,0 +1,4 @@
+destination = /data/destination/Shaun The Sheep
+series-name  = Shaun The Sheep
+naming-pattern = Shaun The Sheep( Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)
+directory = /data/source/Shaun The Sheep

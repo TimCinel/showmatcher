@@ -1,5 +1,6 @@
-ConfigArgParse==0.12.0
-fuzzywuzzy==0.16.0
-python-Levenshtein==0.12.0
-tvdb-api==2.0
-requests-cache==0.5.2
+ConfigArgParse>=1.0
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.12.2
+tvdb-api>=3.1.0
+requests-cache>=0.5.2
+PyYAML>=6.0
