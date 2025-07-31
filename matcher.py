@@ -5,7 +5,7 @@ import re
 import sys
 import shutil
 
-import tvdb_api
+import tvdb_v4_official
 import configargparse
 
 from fuzzywuzzy import process
@@ -79,9 +79,12 @@ for show_file in file_list:
             return
         elif os.path.exists(new_file):
             print("WARNING: Couldn't move {}, destination file already exists.".format(show_file))
-        elif not os.path.exists(os.path.dirname(new_file)):
-            print("WARNING: Couldn't move {}, destination directory does not exist.".format(show_file))
         else:
+            # Create destination directory if it doesn't exist
+            if not os.path.exists(os.path.dirname(new_file)):
+                os.makedirs(os.path.dirname(new_file), exist_ok=True)
+                print("Created directory: {}".format(os.path.dirname(new_file)))
+            
             shutil.move(os.path.join(args.directory, show_file), new_file)
 
             for sidecar in sidcars:
@@ -101,25 +104,117 @@ for show_file in file_list:
                 print("Get your API key from: https://thetvdb.com/api-information")
                 sys.exit(1)
             
-            tvdb = tvdb_api.Tvdb(apikey=args.tvdb_api_key)
+            tvdb = tvdb_v4_official.TVDB(args.tvdb_api_key)
 
-        show = tvdb[args.series if args.series_id is None else args.series_id]
-
+        # Clean up the episode name from the filename
         episode_name = re.compile(args.ignore).sub("", basename_noext).strip()
         print("Looking up {} episode \"{}\"".format(args.series, episode_name))
 
-        fuzzyMatch = process.extractOne(
-            query=episode_name,
-            choices={episode['id']: episode['episodeName'] for season in show.values() for episode in season.values()},
-            score_cutoff=90
-        )
-        if (fuzzyMatch):
-            episode = show.search(fuzzyMatch[2], 'id')[0]
-            episode['seriesName'] = args.series
+        try:
+            # First, find the series
+            series_id = args.series_id
+            if series_id is None:
+                # Use the search API to find the series by name
+                try:
+                    search_results = tvdb.search(args.series)
+                    series_found = None
+                    
+                    if search_results:
+                        # Look for exact or close matches in the search results
+                        for result in search_results:
+                            result_name = result.get('name', '').lower()
+                            search_name = args.series.lower()
+                            
+                            # Try exact match first, then partial match
+                            if (result_name == search_name or 
+                                search_name in result_name or 
+                                result_name in search_name):
+                                series_found = result
+                                # Extract numeric ID from the series ID string
+                                series_id_str = result.get('tvdb_id', result.get('id', ''))
+                                if isinstance(series_id_str, str) and series_id_str.isdigit():
+                                    series_id = int(series_id_str)
+                                elif isinstance(series_id_str, int):
+                                    series_id = series_id_str
+                                else:
+                                    # Try to extract from compound ID like "series-78804"
+                                    if isinstance(series_id_str, str) and '-' in series_id_str:
+                                        series_id = int(series_id_str.split('-')[-1])
+                                
+                                print("Found series: {} (ID: {})".format(result.get('name'), series_id))
+                                break
+                    
+                    if not series_found:
+                        print("WARNING: Series '{}' not found in TVDB search results.".format(args.series))
+                        return
+                        
+                except Exception as e:
+                    print("ERROR: TVDB search failed: {}".format(e))
+                    return
 
-            matching_episode(episode)
-        else:
-            print("WARNING: No adequate TVDB match found for {}.".format(episode_name))
+            # Get all episodes for the series
+            all_episodes = []
+            page = 0
+            while True:
+                try:
+                    episodes_data = tvdb.get_series_episodes(series_id, page=page)
+                    if 'episodes' not in episodes_data or not episodes_data['episodes']:
+                        break
+                    all_episodes.extend(episodes_data['episodes'])
+                    page += 1
+                    # Limit to prevent infinite loops
+                    if page > 20:
+                        break
+                except:
+                    break
+
+            if not all_episodes:
+                print("WARNING: No episodes found for series '{}'.".format(args.series))
+                return
+
+            # Build choices for fuzzy matching
+            choices = {}
+            for episode in all_episodes:
+                ep_name = episode.get('name', '')
+                if ep_name:
+                    choices[episode.get('id', 0)] = ep_name
+
+            if not choices:
+                print("WARNING: No episode names found for fuzzy matching.")
+                return
+
+            # Perform fuzzy matching
+            fuzzyMatch = process.extractOne(
+                query=episode_name,
+                choices=choices,
+                score_cutoff=90
+            )
+
+            if fuzzyMatch:
+                # Find the matched episode
+                matched_episode = None
+                for episode in all_episodes:
+                    if episode.get('id') == fuzzyMatch[2]:
+                        matched_episode = episode
+                        break
+
+                if matched_episode:
+                    # Convert v4 episode format to old format for compatibility
+                    episode_data = {
+                        'episodeName': matched_episode.get('name', ''),
+                        'airedSeason': matched_episode.get('seasonNumber', 1),
+                        'airedEpisodeNumber': matched_episode.get('number', 1),
+                        'seriesName': args.series,
+                        'id': matched_episode.get('id', 0)
+                    }
+                    matching_episode(episode_data)
+                else:
+                    print("WARNING: Matched episode not found in episode list.")
+            else:
+                print("WARNING: No adequate TVDB match found for {}.".format(episode_name))
+
+        except Exception as e:
+            print("ERROR: TVDB lookup failed: {}".format(e))
 
     def episode_known_pattern():
         episode_details = re.compile(args.naming_pattern).search(basename_noext)
@@ -138,6 +233,17 @@ for show_file in file_list:
                     'seriesName': args.series,
                 })
             else:
+                # Validate that required groups are present
+                if not episode_details.group('season'):
+                    print("ERROR: Pattern matched but 'season' group is missing for: {}".format(basename_noext))
+                    print("       The naming-pattern must include (?P<season>...) group")
+                    return
+                if not episode_details.group('episode'):
+                    print("ERROR: Pattern matched but 'episode' group is missing for: {}".format(basename_noext))
+                    print("       The naming-pattern must include (?P<episode>...) group") 
+                    print("       Use --ignore-substring for files without episode numbers")
+                    return
+                    
                 season = int(episode_details.group('season'))
                 episode = int(episode_details.group('episode'))
                 name = episode_details.group('name')

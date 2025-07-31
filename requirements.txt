@@ -4,6 +4,5 @@ fuzzywuzzy>=0.18.0
 python-Levenshtein>=0.12.2
 PyYAML>=6.0
 
-# TVDB dependencies with compatible versions
-tvdb_api==3.1.0
-requests-cache<0.6.0
+# TVDB v4 API
+tvdb_v4_official

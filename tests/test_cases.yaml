@@ -6,7 +6,7 @@ test_suites:
     config:
       destination: "/data/destination/Peter Rabbit (2013)"
       series-name: "Peter Rabbit (2013)"
-      naming-pattern: "Peter Rabbit (Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+      ignore-substring: "Peter Rabbit Series [0-9]+ "
       directory: "/data/source/Peter Rabbit"
       dry-run: true
     tvdb_mock_data:
@@ -42,13 +42,13 @@ test_suites:
       - in: "Peter Rabbit Series 2 The Tale Of Cotton-Tails Party.mp4"
         out: "Season 02/Peter Rabbit (2013) S02E01 The Tale Of Cotton-Tails Party.mp4"
       
-      # Multi-file test (video + sidecar)
+      # Multi-file test (video + sidecar) - fuzzy match found!
       - in:
           - "Peter Rabbit Series 2 The Tale of Cottontail-s Treetop Tumble.mp4"
           - "Peter Rabbit Series 2 The Tale of Cottontail-s Treetop Tumble.srt"
         out:
-          - "Season 02/Peter Rabbit (2013) S02E01 The Tale of Cottontail-s Treetop Tumble.mp4"
-          - "Season 02/Peter Rabbit (2013) S02E01 The Tale of Cottontail-s Treetop Tumble.srt"
+          - "Season 02/Peter Rabbit (2013) S02E07 The Tale of the Cotton-tail's Treetop Tumble.mp4"
+          - "Season 02/Peter Rabbit (2013) S02E07 The Tale of the Cotton-tail's Treetop Tumble.srt"
       
       # Another multi-file test
       - in:
@@ -63,12 +63,16 @@ test_suites:
       # Single sidecar file test
       - in: "Peter Rabbit Series 1 The Tale Of Benjamin-s New Map.srt"
         out: "Season 01/Peter Rabbit (2013) S01E01 The Tale Of Benjamin-s New Map.srt"
+        
+      # Test case with no expected match - completely made up episode name
+      - in: "Peter Rabbit Series 3 The Tale Of The Completely Made Up Episode That Does Not Exist.mp4"
+        # No 'out' field means no match expected - file should remain in input directory
 
   - name: "Shaun The Sheep Pattern Matching"
     config:
       destination: "/data/destination/Shaun The Sheep"
       series-name: "Shaun The Sheep"
-      naming-pattern: "Shaun The Sheep( Series (?P<season>[0-9]+))?( Episode (?P<episode>[0-9]+))? (?P<name>.*)"
+      ignore-substring: "Shaun The Sheep (Series|Episode) [0-9]+ "
       directory: "/data/source/Shaun The Sheep"
       dry-run: true
     tvdb_mock_data:
@@ -135,6 +139,28 @@ test_suites:
         out:
           - "Season 04/Shaun The Sheep S04E01 Happy Birthday Timmy.mp4"
           - "Season 04/Shaun The Sheep S04E01 Happy Birthday Timmy.srt"
+
+  - name: "Full Pattern Matching"
+    config:
+      destination: "/data/destination/Test Show"
+      series-name: "Test Show"
+      naming-pattern: "Test Show S(?P<season>[0-9]+)E(?P<episode>[0-9]+) (?P<name>.*)"
+      directory: "/data/source/Test Show"
+      dry-run: true
+    tests:
+      - in: "Test Show S01E01 Pilot Episode.mp4"
+        out: "Season 01/Test Show S01E01 Pilot Episode.mp4"
+      - in: "Test Show S01E02 Second Episode.mp4"
+        out: "Season 01/Test Show S01E02 Second Episode.mp4"
+      - in: "Test Show S02E05 Mid Season.mp4"
+        out: "Season 02/Test Show S02E05 Mid Season.mp4"
+      # Multi-file test
+      - in:
+          - "Test Show S01E03 With Subtitles.mp4"
+          - "Test Show S01E03 With Subtitles.srt"
+        out:
+          - "Season 01/Test Show S01E03 With Subtitles.mp4"
+          - "Season 01/Test Show S01E03 With Subtitles.srt"
 
   - name: "Filename Character Filtering"
     config:
