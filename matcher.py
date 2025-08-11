@@ -23,6 +23,8 @@ parser.add_argument('--tvdb-api-key', dest='tvdb_api_key', action='store',
 
 parser.add_argument('--directory', dest='directory', action='store', required=True)
 parser.add_argument('--dry-run', dest='dry_run', default=False, action='store_true')
+parser.add_argument('--no-overwrite', dest='no_overwrite', default=False, action='store_true',
+                    help='Do not overwrite existing destination files')
 
 ignore_or_series = parser.add_mutually_exclusive_group(required=True)
 ignore_or_series.add_argument('--ignore-substring', dest='ignore', action='store')
@@ -77,19 +79,28 @@ for show_file in file_list:
         if args.dry_run:
             print("Dry run!")
             return
-        elif os.path.exists(new_file):
-            print("WARNING: Couldn't move {}, destination file already exists.".format(show_file))
-        else:
-            # Create destination directory if it doesn't exist
-            if not os.path.exists(os.path.dirname(new_file)):
-                os.makedirs(os.path.dirname(new_file), exist_ok=True)
-                print("Created directory: {}".format(os.path.dirname(new_file)))
-            
-            shutil.move(os.path.join(args.directory, show_file), new_file)
+        
+        # Create destination directory if it doesn't exist
+        dest_dir = os.path.dirname(new_file)
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir, exist_ok=True)
+            print("Created directory: {}".format(dest_dir))
+        
+        if os.path.exists(new_file):
+            if args.no_overwrite:
+                print("WARNING: Couldn't move {}, destination file already exists.".format(show_file))
+                return
+            else:
+                print("Overwriting existing file: {}".format(new_file))
+                os.remove(new_file)
+        
+        shutil.move(os.path.join(args.directory, show_file), new_file)
 
-            for sidecar in sidcars:
-                new_sidecar = os.path.join(args.destination, "{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
-                shutil.move(sidecar, new_sidecar)
+        for sidecar in sidcars:
+            new_sidecar = os.path.join(args.destination, "{}{}".format(nice_path, os.path.splitext(sidecar)[1]))
+            if os.path.exists(new_sidecar) and not args.no_overwrite:
+                os.remove(new_sidecar)
+            shutil.move(sidecar, new_sidecar)
 
     def normalise(tvdb_episode_name):
         return re.sub(r"[^0-9a-z ]", '', tvdb_episode_name.lower())
